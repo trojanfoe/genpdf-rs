@@ -105,7 +105,7 @@ impl Element for CodeBlock {
                 for s in line {
                     // Trim to remove end line character
                     section.print_str_xoff_trim(
-                        &s.s.trim_end_matches('\n'),
+                        s.s.trim_end_matches('\n'),
                         s.style,
                         Mm(0.0),
                         false,

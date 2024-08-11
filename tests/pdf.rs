@@ -7,9 +7,9 @@ const FONT_DIRS: &[&str] = &[
     "/usr/share/fonts/liberation",
     "/usr/share/fonts/truetype/liberation",
 ];
-const DEFAULT_FONT_NAME: &'static str = "LiberationSans";
+const DEFAULT_FONT_NAME: &str = "LiberationSans";
 
-const LOREM_IPSUM: &'static str =
+const LOREM_IPSUM: &str =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut \
     labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco \
     laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in \
@@ -21,8 +21,7 @@ const LOREM_IPSUM: &'static str =
 fn get_document() -> genpdf::Document {
     let font_dir = FONT_DIRS
         .iter()
-        .filter(|path| std::path::Path::new(path).exists())
-        .next()
+        .find(|path| std::path::Path::new(path).exists())
         .expect("Could not find font directory");
     let default_font =
         fonts::from_files(font_dir, DEFAULT_FONT_NAME, Some(fonts::Builtin::Helvetica))
@@ -30,8 +29,8 @@ fn get_document() -> genpdf::Document {
 
     let mut doc = genpdf::Document::new(default_font);
     doc.set_minimal_conformance();
-    doc.set_creation_date(printpdf::OffsetDateTime::unix_epoch());
-    doc.set_modification_date(printpdf::OffsetDateTime::unix_epoch());
+    doc.set_creation_date(printpdf::OffsetDateTime::UNIX_EPOCH);
+    doc.set_modification_date(printpdf::OffsetDateTime::UNIX_EPOCH);
     doc
 }
 
@@ -40,7 +39,7 @@ fn get_document() -> genpdf::Document {
 fn check(name: &str, doc: genpdf::Document) {
     let expected_dir = std::path::Path::new("tests/files");
     if !expected_dir.exists() {
-        std::fs::create_dir(&expected_dir).expect("Failed to create expected directory");
+        std::fs::create_dir(expected_dir).expect("Failed to create expected directory");
     }
 
     let mut actual_doc: Vec<u8> = Vec::new();

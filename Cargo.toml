@@ -3,9 +3,9 @@
 
 [package]
 name = "genpdf"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Robin Krahl <robin.krahl@ireas.org>"]
-edition = "2018"
+edition = "2021"
 description = "User-friendly PDF generator written in pure Rust"
 homepage = "https://sr.ht/~ireas/genpdf-rs"
 repository = "https://git.sr.ht/~ireas/genpdf-rs"
@@ -16,6 +16,15 @@ license = "Apache-2.0 OR MIT"
 exclude = [".builds/*"]
 readme = "README.md"
 
+[features]
+default = []
+images = ["image", "printpdf/embedded_images"]
+math = ["dep:rex", "dep:font"]
+code-syntax-highlighting = ["dep:syntect"]
+
+[package.metadata.docs.rs]
+all-features = true
+
 [[example]]
 name = "images"
 required-features = ["images"]
@@ -25,18 +34,18 @@ name = "math"
 required-features = ["math"]
 
 [dependencies]
-lopdf = "0.27"
+lopdf = "0.33"
 rusttype = "0.9"
 rex = { git = "https://github.com/Twometer/ReX", rev = "d0991f44a66dee84f5280277e9251f26777871cb", optional = true }
-font = { git = "https://github.com/pdf-rs/font", features = [
-    "woff",
-], optional = true }
+font = { version = "0.38.1", optional = true }
 syntect = { version = "5.0", default-features = false, features = [
-    "parsing", "default-syntaxes", "default-themes"
-], optional = true}
+    "parsing",
+    "default-syntaxes",
+    "default-themes",
+], optional = true }
 
 [dependencies.image]
-version = "0.24.4"
+version = "0.24"         # This must match the version used in `printpdf`
 default-features = false
 optional = true
 
@@ -45,32 +54,20 @@ version = "0.8"
 optional = true
 
 [dependencies.printpdf]
-git = "https://github.com/dnlmlr/printpdf"
-rev = "ddf56f2a71e1321d14626f38c5bbc79b8a2985d8"
+version = "0.7"
 default-features = false
-features = [
-    "font_subsetting",
-]
+features = ["font_subsetting"]
 
 [dependencies.derive_more]
-version = "0.99"
+version = "1.0"
 default-features = false
 features = ["add", "add_assign", "from", "into", "mul", "mul_assign", "sum"]
 
 [dev-dependencies.float-cmp]
-version = "0.8"
+version = "0.9"
 default-features = false
 features = ["std"]
 
 [dev-dependencies.hyphenation]
 version = "0.8"
 features = ["embed_en-us"]
-
-[features]
-default = []
-images = ["image", "printpdf/embedded_images"]
-math = ["dep:rex", "dep:font"]
-code-syntax-highlighting = ["dep:syntect"]
-
-[package.metadata.docs.rs]
-all-features = true

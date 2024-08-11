@@ -23,6 +23,8 @@ use std::io;
 use std::ops;
 use std::rc;
 
+use printpdf::path::PaintMode;
+use printpdf::path::WindingOrder;
 use printpdf::Pt;
 
 use crate::error::{Context as _, Error, ErrorKind};
@@ -340,13 +342,13 @@ impl<'p> Layer<'p> {
         position: LayerPosition,
         scale: Scale,
         rotation: Rotation,
-        dpi: Option<f64>,
+        dpi: Option<f32>,
     ) {
         let dynamic_image = printpdf::Image::from_dynamic_image(image);
         let position = self.transform_position(position);
 
         let rotation = printpdf::ImageRotation {
-            angle_ccw_degrees: rotation.degrees,
+            angle_ccw_degrees: rotation.degrees as f32,
             rotation_center_x: printpdf::Px(0),
             rotation_center_y: printpdf::Px(0),
         };
@@ -354,9 +356,9 @@ impl<'p> Layer<'p> {
         let transform = printpdf::ImageTransform {
             translate_x: Some(position.x.into()),
             translate_y: Some(position.y.into()),
-            rotate: Some(rotation.into()),
-            scale_x: Some(scale.x),
-            scale_y: Some(scale.y),
+            rotate: Some(rotation),
+            scale_x: Some(scale.x as f32),
+            scale_y: Some(scale.y as f32),
             dpi,
         };
 
@@ -367,18 +369,20 @@ impl<'p> Layer<'p> {
     where
         I: IntoIterator<Item = LayerPosition>,
     {
-        let line_points: Vec<_> = points
+        let rings: Vec<_> = points
             .into_iter()
             .map(|pos| (self.transform_position(pos).into(), false))
             .collect();
-        let line = printpdf::Line {
-            points: line_points,
-            is_closed: false,
-            has_fill: filled,
-            has_stroke: true,
-            is_clipping_path: false,
+        let polygon = printpdf::Polygon {
+            rings: vec![rings],
+            mode: if filled {
+                PaintMode::Fill
+            } else {
+                PaintMode::Stroke
+            },
+            winding_order: WindingOrder::NonZero,
         };
-        self.data.layer.add_shape(line);
+        self.data.layer.add_polygon(polygon);
     }
 
     fn set_fill_color(&self, color: Option<Color>) {
@@ -423,14 +427,14 @@ impl<'p> Layer<'p> {
     }
 
     fn set_line_height(&self, line_height: Mm) {
-        self.data.layer.set_line_height(line_height.0);
+        self.data.layer.set_line_height(line_height.0 as f32);
     }
 
     fn set_font(&self, font: &printpdf::IndirectFontRef, font_size: u8) {
         self.data.layer.set_font(font, font_size.into());
     }
 
-    fn set_font_f64(&self, font: &printpdf::IndirectFontRef, font_size: f64) {
+    fn set_font_f64(&self, font: &printpdf::IndirectFontRef, font_size: f32) {
         self.data.layer.set_font(font, font_size);
     }
 
@@ -441,7 +445,7 @@ impl<'p> Layer<'p> {
     {
         self.data
             .layer
-            .write_positioned_codepoints(positions.into_iter().zip(codepoints.into_iter()));
+            .write_positioned_codepoints(positions.into_iter().zip(codepoints));
     }
 
     /// Transforms the given position that is relative to the upper left corner of the layer to a
@@ -596,7 +600,7 @@ impl<'p> Area<'p> {
         position: Position,
         scale: Scale,
         rotation: Rotation,
-        dpi: Option<f64>,
+        dpi: Option<f32>,
     ) {
         self.layer
             .add_image(image, self.position(position), scale, rotation, dpi);
@@ -667,7 +671,7 @@ impl<'p> Area<'p> {
         origin: Position,
         positions: P,
         codepoints: C,
-        font_size: f64,
+        font_size: f32,
         style: Style,
     ) where
         C: IntoIterator<Item = u16>,
@@ -736,7 +740,7 @@ impl<'f, 'p> TextSection<'f, 'p> {
         }
     }
 
-    fn set_font_f64(&mut self, font: &printpdf::IndirectFontRef, font_size: f64) {
+    fn set_font_f64(&mut self, font: &printpdf::IndirectFontRef, font_size: f32) {
         // todo caching clusterfuck
         self.area.layer.set_font_f64(font, font_size);
     }
@@ -800,7 +804,7 @@ impl<'f, 'p> TextSection<'f, 'p> {
 
         let mut positions = font.kerning(self.font_cache, s.chars());
         if let Some(first_char_pos) = positions.get_mut(0) {
-            *first_char_pos += extra_word_spacing.0 as f32;
+            *first_char_pos += extra_word_spacing.0;
         }
 
         let positions = positions
@@ -813,7 +817,7 @@ impl<'f, 'p> TextSection<'f, 'p> {
             // Built-in fonts always use the Windows-1252 encoding
             encode_win1252(s)?
         } else {
-            font.glyph_ids(&self.font_cache, s.chars())
+            font.glyph_ids(self.font_cache, s.chars())
         };
 
         let font = self
@@ -843,7 +847,7 @@ impl<'f, 'p> TextSection<'f, 'p> {
         style: Style,
         positions: P,
         codepoints: C,
-        font_size: f64,
+        font_size: f32,
     ) where
         P: IntoIterator<Item = f64>,
         C: IntoIterator<Item = u16>,

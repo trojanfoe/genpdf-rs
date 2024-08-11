@@ -390,13 +390,10 @@ impl Element for Paragraph {
                                 .str_width(&context.font_cache, word.s.trim_start());
                         width -= diff;
                     }
-                    match (trim_spaces, line.last()) {
-                        (true, Some(word)) => {
-                            let diff = word.width(&context.font_cache)
-                                - word.style.str_width(&context.font_cache, word.s.trim_end());
-                            width -= diff;
-                        }
-                        _ => (),
+                    if let (true, Some(word)) = (trim_spaces, line.last()) {
+                        let diff = word.width(&context.font_cache)
+                            - word.style.str_width(&context.font_cache, word.s.trim_end());
+                        width -= diff;
                     }
 
                     let leftover_space = area.size().width - width;

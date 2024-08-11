@@ -61,20 +61,20 @@ impl From<Color> for printpdf::Color {
     fn from(color: Color) -> printpdf::Color {
         match color {
             Color::Rgb(r, g, b) => printpdf::Color::Rgb(printpdf::Rgb::new(
-                f64::from(r) / 255.0,
-                f64::from(g) / 255.0,
-                f64::from(b) / 255.0,
+                f32::from(r) / 255.0,
+                f32::from(g) / 255.0,
+                f32::from(b) / 255.0,
                 None,
             )),
             Color::Cmyk(c, m, y, k) => printpdf::Color::Cmyk(printpdf::Cmyk::new(
-                f64::from(c) / 255.0,
-                f64::from(m) / 255.0,
-                f64::from(y) / 255.0,
-                f64::from(k) / 255.0,
+                f32::from(c) / 255.0,
+                f32::from(m) / 255.0,
+                f32::from(y) / 255.0,
+                f32::from(k) / 255.0,
                 None,
             )),
             Color::Greyscale(val) => {
-                printpdf::Color::Greyscale(printpdf::Greyscale::new(f64::from(val) / 255.0, None))
+                printpdf::Color::Greyscale(printpdf::Greyscale::new(f32::from(val) / 255.0, None))
             }
         }
     }
@@ -472,10 +472,10 @@ impl<'s> StyledStr<'s> {
     ///
     /// [`FontCache`]: ../fonts/struct.FontCache.html
     pub fn width(&self, font_cache: &fonts::FontCache) -> Mm {
-        self.style.str_width(font_cache, &self.s)
+        self.style.str_width(font_cache, self.s)
     }
 
-    /// Calculates the width of the this string if it was trimmed at the end with this style using 
+    /// Calculates the width of the this string if it was trimmed at the end with this style using
     /// the data in the given font cache.
     ///
     /// If the font family is set for the style, it must have been created by the given
@@ -483,7 +483,7 @@ impl<'s> StyledStr<'s> {
     ///
     /// [`FontCache`]: ../fonts/struct.FontCache.html
     pub fn width_trimmed_end(&self, font_cache: &fonts::FontCache) -> Mm {
-        self.style.str_width(font_cache, &self.s.trim_end())
+        self.style.str_width(font_cache, self.s.trim_end())
     }
 }
 
@@ -545,7 +545,7 @@ impl<'s> StyledCow<'s> {
         self.style.str_width(font_cache, self.s.as_ref())
     }
 
-    /// Calculates the width of the this string if it was trimmed at the end with this style using 
+    /// Calculates the width of the this string if it was trimmed at the end with this style using
     /// the data in the given font cache.
     ///
     /// If the font family is set for the style, it must have been created by the given
@@ -553,7 +553,7 @@ impl<'s> StyledCow<'s> {
     ///
     /// [`FontCache`]: ../fonts/struct.FontCache.html
     pub fn width_trimmed_end(&self, font_cache: &fonts::FontCache) -> Mm {
-        self.style.str_width(font_cache, &self.s.trim_end())
+        self.style.str_width(font_cache, self.s.trim_end())
     }
 }
 

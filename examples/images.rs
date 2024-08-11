@@ -11,11 +11,11 @@ const FONT_DIRS: &[&str] = &[
     "/usr/share/fonts/liberation",
     "/usr/share/fonts/truetype/liberation",
 ];
-const DEFAULT_FONT_NAME: &'static str = "LiberationSans";
+const DEFAULT_FONT_NAME: &str = "LiberationSans";
 
-const IMAGE_PATH_JPG: &'static str = "examples/images/test_image.jpg";
-const IMAGE_PATH_BMP: &'static str = "examples/images/test_image.bmp";
-const IMAGE_PATH_PNG: &'static str = "examples/images/test_image.png";
+const IMAGE_PATH_JPG: &str = "examples/images/test_image.jpg";
+const IMAGE_PATH_BMP: &str = "examples/images/test_image.bmp";
+const IMAGE_PATH_PNG: &str = "examples/images/test_image.png";
 
 fn main() {
     let args: Vec<_> = env::args().skip(1).collect();
@@ -26,8 +26,7 @@ fn main() {
 
     let font_dir = FONT_DIRS
         .iter()
-        .filter(|path| std::path::Path::new(path).exists())
-        .next()
+        .find(|path| std::path::Path::new(path).exists())
         .expect("Could not find font directory");
     let default_font =
         fonts::from_files(font_dir, DEFAULT_FONT_NAME, Some(fonts::Builtin::Helvetica))
@@ -86,7 +85,7 @@ fn main() {
         .element(elements::Text::new("Double Size").padded(1))
         .push()
         .expect("Invalid row");
-    for (ftype, path) in vec![
+    for (ftype, path) in [
         ("BMP", IMAGE_PATH_BMP),
         ("JPG", IMAGE_PATH_JPG),
         ("PNG", IMAGE_PATH_PNG),

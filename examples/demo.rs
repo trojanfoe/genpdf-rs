@@ -8,7 +8,7 @@
 //! - `{FONT_DIR}/{name}-Bold.ttf`
 //! - `{FONT_DIR}/{name}-Italic.ttf`
 //! - `{FONT_DIR}/{name}-BoldItalic.ttf`
-//! for `name` in {`DEFAULT_FONT_NAME`, `MONO_FONT_NAME`}.
+//!     for `name` in {`DEFAULT_FONT_NAME`, `MONO_FONT_NAME`}.
 //!
 //! The generated document using the latest `genpdf-rs` release is available
 //! [here](https://genpdf-rs.ireas.org/examples/demo.pdf).
@@ -23,9 +23,9 @@ const FONT_DIRS: &[&str] = &[
     "/usr/share/fonts/liberation",
     "/usr/share/fonts/truetype/liberation",
 ];
-const DEFAULT_FONT_NAME: &'static str = "LiberationSans";
-const MONO_FONT_NAME: &'static str = "LiberationMono";
-const LOREM_IPSUM: &'static str =
+const DEFAULT_FONT_NAME: &str = "LiberationSans";
+const MONO_FONT_NAME: &str = "LiberationMono";
+const LOREM_IPSUM: &str =
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut \
     labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco \
     laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in \
@@ -41,13 +41,11 @@ fn main() {
 
     let font_dir = FONT_DIRS
         .iter()
-        .filter(|path| std::path::Path::new(path).exists())
-        .next()
+        .find(|path| std::path::Path::new(path).exists())
         .expect("Could not find font directory");
-    let default_font =
-        fonts::from_files(font_dir, DEFAULT_FONT_NAME, Some(fonts::Builtin::Helvetica))
-            .expect("Failed to load the default font family");
-    let monospace_font = fonts::from_files(font_dir, MONO_FONT_NAME, Some(fonts::Builtin::Courier))
+    let default_font = fonts::from_files(font_dir, DEFAULT_FONT_NAME, None)
+        .expect("Failed to load the default font family");
+    let monospace_font = fonts::from_files(font_dir, MONO_FONT_NAME, None)
         .expect("Failed to load the monospace font family");
 
     let mut doc = genpdf::Document::new(default_font);
@@ -305,7 +303,7 @@ fn main() {
 mod images {
     use super::*;
 
-    const IMAGE_PATH_JPG: &'static str = "examples/images/test_image.jpg";
+    const IMAGE_PATH_JPG: &str = "examples/images/test_image.jpg";
 
     pub fn do_image_test(doc: &mut genpdf::Document) {
         doc.push(elements::Paragraph::new(

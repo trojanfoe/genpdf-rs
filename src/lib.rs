@@ -266,7 +266,7 @@ impl From<f32> for Mm {
 
 impl From<printpdf::Mm> for Mm {
     fn from(mm: printpdf::Mm) -> Mm {
-        Mm(mm.0)
+        Mm(mm.0 as f64)
     }
 }
 
@@ -279,13 +279,13 @@ impl From<printpdf::Pt> for Mm {
 
 impl From<Mm> for printpdf::Mm {
     fn from(mm: Mm) -> printpdf::Mm {
-        printpdf::Mm(mm.0)
+        printpdf::Mm(mm.0 as f32)
     }
 }
 
 impl From<Mm> for printpdf::Pt {
     fn from(mm: Mm) -> printpdf::Pt {
-        printpdf::Mm(mm.0).into()
+        printpdf::Mm(mm.0 as f32).into()
     }
 }
 
@@ -295,9 +295,10 @@ impl From<Mm> for printpdf::Pt {
 ///
 /// [`Paragraph`]: elements/struct.Paragraph.html
 /// [`Image`]: elements/struct.Image.html
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub enum Alignment {
     /// Left-flushed.
+    #[default]
     Left,
     /// Right-flushed.
     Right,
@@ -308,12 +309,6 @@ pub enum Alignment {
     /// be kept, resulting in a not fully aligned look (this seems to be the default in LaTeX).
     /// When set to true, the last non-space character will be aligned to the right side instead.
     Justified(bool),
-}
-
-impl Default for Alignment {
-    fn default() -> Alignment {
-        Alignment::Left
-    }
 }
 
 /// A position on a PDF layer, measured in millimeters.

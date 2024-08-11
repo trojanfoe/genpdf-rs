@@ -61,7 +61,7 @@ pub struct Image {
     rotation: Rotation,
 
     /// DPI override if you know better. Defaults to `printpdf`’s default of 300 dpi.
-    dpi: Option<f64>,
+    dpi: Option<f32>,
 
     /// With this setting, the image is scaled to fit the page width before applying the actual
     /// scale value.
@@ -179,14 +179,13 @@ impl Image {
 
     /// Calculates a guess for the size of the image based on the dpi/pixel-count/scale.
     fn get_size(&self) -> Size {
-        let mmpi: f64 = 25.4; // millimeters per inch
+        let mmpi: f32 = 25.4; // millimeters per inch
                               // Assume 300 DPI to be consistent with printpdf.
-        let dpi: f64 = self.dpi.unwrap_or(300.0);
+        let dpi: f32 = self.dpi.unwrap_or(300.0);
         let (px_width, px_height) = self.data.dimensions();
-        let (scale_width, scale_height): (f64, f64) = (self.scale.x, self.scale.y);
         Size::new(
-            mmpi * ((scale_width * px_width as f64) / dpi),
-            mmpi * ((scale_height * px_height as f64) / dpi),
+            mmpi * ((self.scale.x as f32 * px_width as f32) / dpi),
+            mmpi * ((self.scale.y as f32 * px_height as f32) / dpi),
         )
     }
 
@@ -203,12 +202,12 @@ impl Image {
     }
 
     /// Sets the expected DPI of the encoded image.
-    pub fn set_dpi(&mut self, dpi: f64) {
+    pub fn set_dpi(&mut self, dpi: f32) {
         self.dpi = Some(dpi);
     }
 
     /// Sets the expected DPI of the encoded image and returns it.
-    pub fn with_dpi(mut self, dpi: f64) -> Self {
+    pub fn with_dpi(mut self, dpi: f32) -> Self {
         self.set_dpi(dpi);
         self
     }
